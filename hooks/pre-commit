@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if git rev-parse --verify HEAD >/dev/null 2>&1; then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
+fi
+
+CMAKE_FORMAT=$(which cmake-format)
+CLANG_FORMAT=$(which clang-format)
+
+# Redirect output to stderr.
+exec 1>&2
+
+for f in $(git diff --cached --name-only --diff-filter=AMR "${against}"); do
+	if [[ $f =~ CMakeLists.txt$ || $f =~ cmake$ ]]; then
+		${CMAKE_FORMAT} -i "${f}" &&
+			git add "${f}" &&
+			echo "${f}"
+	elif [[ $f =~ [ch](pp)?$ || $f =~ proto$ ]]; then
+		${CLANG_FORMAT} -i "${f}" &&
+			git add "${f}" &&
+			echo "${f}"
+	fi
+done
