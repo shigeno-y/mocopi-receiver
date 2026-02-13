@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #if !defined(SHIGENOY_MOCOPIRECEIVER_RECEIVER_HPP)
 #    define SHIGENOY_MOCOPIRECEIVER_RECEIVER_HPP
 #endif

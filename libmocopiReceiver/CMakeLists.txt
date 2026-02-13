@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: usdMMDPlugins-LICENSE-1
+# SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.27)
 
@@ -16,7 +16,7 @@ target_sources(
          include
          FILES
          include/shigenoy/mocopi-receiver/Data.hpp #
-         include/shigenoy/mocopi-receiver/Data/Block.hpp #
+         include/shigenoy/mocopi-receiver/Data/Container.hpp #
          include/shigenoy/mocopi-receiver/Data/FRAM.hpp #
          include/shigenoy/mocopi-receiver/Data/HEAD.hpp #
          include/shigenoy/mocopi-receiver/Data/SKDF.hpp #
@@ -28,7 +28,7 @@ target_sources(
 target_sources(
   ${PROJECT_NAME}
   PRIVATE src/Data.cpp #
-          src/Data/Block.cpp #
+          src/Data/Container.cpp #
           src/Data/FRAM.cpp #
           src/Data/HEAD.cpp #
           src/Data/SKDF.cpp #
