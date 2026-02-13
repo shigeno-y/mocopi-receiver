@@ -21,7 +21,6 @@ public:
     static constexpr size_t PayloadLength{ payload_size };
 
 public:
-    size_t size() const { return Size; }
     template <typename T>
     const T parseAs(const size_t offset) const
     {

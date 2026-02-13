@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-#include <shigenoy/mocopi-receiver/Data.hpp>
+#include <shigenoy/mocopi-receiver/Parser.hpp>
 
 #include <bit>
 #include <filesystem>
@@ -35,32 +35,55 @@ main(int argc, char* argv[])
         {
             std::ifstream ifs{ packet_file_path, std::ios::in | std::ios::binary };
             std::vector<char> buf;
-            buf.resize(shigenoy::mocopi_receiver::Head::Size);
+
+            ifs.seekg(0, std::ios::end);
+            buf.resize(ifs.tellg());
+            ifs.seekg(0, std::ios::beg);
+
             ifs.read(buf.data(), buf.size());
             if (ifs)
             {
-                const auto& head = std::bit_cast<shigenoy::mocopi_receiver::Head>(
-                    *(reinterpret_cast<shigenoy::mocopi_receiver::Head*>(buf.data())));
-                std::cout << head.length << "\t" << std::string_view{ head.type.data(), 4 }
-                          << "\n\t";
-                for (const auto& c : head.payload)
+                if (shigenoy::mocopi_receiver::isBoneDefinition(buf))
                 {
-                    std::cout << std::setbase(16) << static_cast<unsigned int>(c) << " ";
+                    const auto& parsed = shigenoy::mocopi_receiver::parseBoneDefinition(buf);
+                    for (const auto& bndt : parsed.bndt_)
+                    {
+                        const auto& bnid = bndt.parseAs<shigenoy::mocopi_receiver::Bnid>(0);
+                        const auto& pbid = bndt.parseAs<shigenoy::mocopi_receiver::Pbid>(
+                            shigenoy::mocopi_receiver::Bnid::Size);
+                        const auto& tran = bndt.parseAs<shigenoy::mocopi_receiver::Tran>(
+                            shigenoy::mocopi_receiver::Bnid::Size +
+                            shigenoy::mocopi_receiver::Pbid::Size);
+                        std::cout << "Bone#" << bnid.parseAs<std::uint16_t>(0);
+                        std::cout << "\tParent#" << pbid.parseAs<std::uint16_t>(0);
+                        std::cout << "\t(quat{X, Y, Z, W}, tran{X, Y, Z})=({";
+                        std::cout << tran.parseAs<float>(0) << ", ";
+                        std::cout << tran.parseAs<float>(4) << ", ";
+                        std::cout << tran.parseAs<float>(8) << ", ";
+                        std::cout << tran.parseAs<float>(12) << "}, {";
+                        std::cout << tran.parseAs<float>(16) << ", ";
+                        std::cout << tran.parseAs<float>(20) << ", ";
+                        std::cout << tran.parseAs<float>(24) << "})\n";
+                    }
                 }
-                std::cout << "\n";
+                else if (shigenoy::mocopi_receiver::isFrameData(buf))
                 {
-                    const auto& ftyp = head.parseAs<shigenoy::mocopi_receiver::Ftyp>(0);
-                    std::cout << ftyp.length << "\t" << std::string_view{ ftyp.type.data(), 4 }
-                              << "\n\t";
-                    std::cout << std::string_view{ ftyp.payload.data(), ftyp.payload.size() }
-                              << "\n";
-                }
-                {
-                    const auto& vrsn = head.parseAs<shigenoy::mocopi_receiver::Vrsn>(
-                        shigenoy::mocopi_receiver::Ftyp::Size);
-                    std::cout << vrsn.length << "\t" << std::string_view{ vrsn.type.data(), 4 }
-                              << "\n\t";
-                    std::cout << static_cast<int>(vrsn.payload[0]) << "\n";
+                    const auto& parsed = shigenoy::mocopi_receiver::parseFrameData(buf);
+                    for (const auto& btdt : parsed.btdt_)
+                    {
+                        const auto& bnid = btdt.parseAs<shigenoy::mocopi_receiver::Bnid>(0);
+                        const auto& tran = btdt.parseAs<shigenoy::mocopi_receiver::Tran>(
+                            shigenoy::mocopi_receiver::Bnid::Size);
+                        std::cout << "Bone#" << bnid.parseAs<std::uint16_t>(0);
+                        std::cout << "\t(quat{X, Y, Z, W}, tran{X, Y, Z})=({";
+                        std::cout << tran.parseAs<float>(0) << ", ";
+                        std::cout << tran.parseAs<float>(4) << ", ";
+                        std::cout << tran.parseAs<float>(8) << ", ";
+                        std::cout << tran.parseAs<float>(12) << "}, {";
+                        std::cout << tran.parseAs<float>(16) << ", ";
+                        std::cout << tran.parseAs<float>(20) << ", ";
+                        std::cout << tran.parseAs<float>(24) << "})\n";
+                    }
                 }
             }
         }
