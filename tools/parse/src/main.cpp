@@ -46,6 +46,7 @@ main(int argc, char* argv[])
                 if (shigenoy::mocopi_receiver::isBoneDefinition(buf))
                 {
                     const auto& parsed = shigenoy::mocopi_receiver::parseBoneDefinition(buf);
+                    std::cout << "BoneDefinition\n";
                     for (const auto& bndt : parsed.bndt_)
                     {
                         const auto& bnid = bndt.parseAs<shigenoy::mocopi_receiver::Bnid>(0);
@@ -69,6 +70,7 @@ main(int argc, char* argv[])
                 else if (shigenoy::mocopi_receiver::isFrameData(buf))
                 {
                     const auto& parsed = shigenoy::mocopi_receiver::parseFrameData(buf);
+                    std::cout << "FrameData\n";
                     for (const auto& btdt : parsed.btdt_)
                     {
                         const auto& bnid = btdt.parseAs<shigenoy::mocopi_receiver::Bnid>(0);
