@@ -2,11 +2,9 @@
 
 #include <shigenoy/mocopi-receiver/Parser.hpp>
 
-#include <bit>
+#include <cstdint>
 #include <filesystem>
-#include <iomanip>
 #include <iostream>
-#include <string_view>
 #include <vector>
 
 #include <CLI/CLI.hpp>
@@ -34,57 +32,63 @@ main(int argc, char* argv[])
         if (std::filesystem::exists(packet_file_path))
         {
             std::ifstream ifs{ packet_file_path, std::ios::in | std::ios::binary };
-            std::vector<char> buf;
+            std::vector<std::byte> buf;
 
             ifs.seekg(0, std::ios::end);
             buf.resize(ifs.tellg());
             ifs.seekg(0, std::ios::beg);
 
-            ifs.read(buf.data(), buf.size());
+            ifs.read(reinterpret_cast<char*>(buf.data()), buf.size());
             if (ifs)
             {
-                if (shigenoy::mocopi_receiver::isBoneDefinition(buf))
+                constexpr shigenoy::mocopi_receiver::CCCode BNDT{ "bndt" };
+                constexpr shigenoy::mocopi_receiver::CCCode BTDT{ "btdt" };
+                constexpr shigenoy::mocopi_receiver::CCCode BNID{ "bnid" };
+                constexpr shigenoy::mocopi_receiver::CCCode PBID{ "pbid" };
+                constexpr shigenoy::mocopi_receiver::CCCode TRAN{ "tran" };
+
+                const auto p = shigenoy::mocopi_receiver::parse(buf);
+
+                if (p.parsed_.contains(BNDT))
                 {
-                    const auto& parsed = shigenoy::mocopi_receiver::parseBoneDefinition(buf);
-                    std::cout << "BoneDefinition\n";
-                    for (const auto& bndt : parsed.bndt_)
+                    // Bone Definition
+                    const auto& [begin, end] = p.parsed_.equal_range(BNDT);
+                    for (auto itr = begin; itr != end; ++itr)
                     {
-                        const auto& bnid = bndt.parseAs<shigenoy::mocopi_receiver::Bnid>(0);
-                        const auto& pbid = bndt.parseAs<shigenoy::mocopi_receiver::Pbid>(
-                            shigenoy::mocopi_receiver::Bnid::Size);
-                        const auto& tran = bndt.parseAs<shigenoy::mocopi_receiver::Tran>(
-                            shigenoy::mocopi_receiver::Bnid::Size +
-                            shigenoy::mocopi_receiver::Pbid::Size);
-                        std::cout << "Bone#" << bnid.parseAs<std::uint16_t>(0);
-                        std::cout << "\tParent#" << pbid.parseAs<std::uint16_t>(0);
+                        const auto& bndt = itr->second;
+                        const auto& bnid = bndt.children_.equal_range(BNID).first->second;
+                        const auto& pbid = bndt.children_.equal_range(PBID).first->second;
+                        const auto& tran = bndt.children_.equal_range(TRAN).first->second;
+                        std::cout << "Bone#" << bnid.readAs<std::uint16_t>(0);
+                        std::cout << "\tParent#" << pbid.readAs<std::uint16_t>(0);
                         std::cout << "\t(quat{X, Y, Z, W}, tran{X, Y, Z})=({";
-                        std::cout << tran.parseAs<float>(0) << ", ";
-                        std::cout << tran.parseAs<float>(4) << ", ";
-                        std::cout << tran.parseAs<float>(8) << ", ";
-                        std::cout << tran.parseAs<float>(12) << "}, {";
-                        std::cout << tran.parseAs<float>(16) << ", ";
-                        std::cout << tran.parseAs<float>(20) << ", ";
-                        std::cout << tran.parseAs<float>(24) << "})\n";
+                        std::cout << tran.readAs<float>(0) << ", ";
+                        std::cout << tran.readAs<float>(4) << ", ";
+                        std::cout << tran.readAs<float>(8) << ", ";
+                        std::cout << tran.readAs<float>(12) << "}, {";
+                        std::cout << tran.readAs<float>(16) << ", ";
+                        std::cout << tran.readAs<float>(20) << ", ";
+                        std::cout << tran.readAs<float>(24) << "})\n";
                     }
                 }
-                else if (shigenoy::mocopi_receiver::isFrameData(buf))
+                else if (p.parsed_.contains(BTDT))
                 {
-                    const auto& parsed = shigenoy::mocopi_receiver::parseFrameData(buf);
-                    std::cout << "FrameData\n";
-                    for (const auto& btdt : parsed.btdt_)
+                    // Frame Data
+                    const auto& [begin, end] = p.parsed_.equal_range(BTDT);
+                    for (auto itr = begin; itr != end; ++itr)
                     {
-                        const auto& bnid = btdt.parseAs<shigenoy::mocopi_receiver::Bnid>(0);
-                        const auto& tran = btdt.parseAs<shigenoy::mocopi_receiver::Tran>(
-                            shigenoy::mocopi_receiver::Bnid::Size);
-                        std::cout << "Bone#" << bnid.parseAs<std::uint16_t>(0);
+                        const auto& bndt = itr->second;
+                        const auto& bnid = bndt.children_.equal_range(BNID).first->second;
+                        const auto& tran = bndt.children_.equal_range(TRAN).first->second;
+                        std::cout << "Bone#" << bnid.readAs<std::uint16_t>(0);
                         std::cout << "\t(quat{X, Y, Z, W}, tran{X, Y, Z})=({";
-                        std::cout << tran.parseAs<float>(0) << ", ";
-                        std::cout << tran.parseAs<float>(4) << ", ";
-                        std::cout << tran.parseAs<float>(8) << ", ";
-                        std::cout << tran.parseAs<float>(12) << "}, {";
-                        std::cout << tran.parseAs<float>(16) << ", ";
-                        std::cout << tran.parseAs<float>(20) << ", ";
-                        std::cout << tran.parseAs<float>(24) << "})\n";
+                        std::cout << tran.readAs<float>(0) << ", ";
+                        std::cout << tran.readAs<float>(4) << ", ";
+                        std::cout << tran.readAs<float>(8) << ", ";
+                        std::cout << tran.readAs<float>(12) << "}, {";
+                        std::cout << tran.readAs<float>(16) << ", ";
+                        std::cout << tran.readAs<float>(20) << ", ";
+                        std::cout << tran.readAs<float>(24) << "})\n";
                     }
                 }
             }

@@ -15,28 +15,20 @@ target_sources(
          BASE_DIRS
          include
          FILES
-         include/shigenoy/mocopi-receiver/Data.hpp #
-         include/shigenoy/mocopi-receiver/Data/Container.hpp #
-         include/shigenoy/mocopi-receiver/Data/FRAM.hpp #
-         include/shigenoy/mocopi-receiver/Data/HEAD.hpp #
-         include/shigenoy/mocopi-receiver/Data/SKDF.hpp #
-         include/shigenoy/mocopi-receiver/Data/SNDF.hpp #
-         include/shigenoy/mocopi-receiver/Data/SNDT.hpp #
+         include/shigenoy/mocopi-receiver/Container.hpp #
          include/shigenoy/mocopi-receiver/Parser.hpp #
          include/shigenoy/mocopi-receiver/Receiver.hpp #
 )
 target_sources(
   ${PROJECT_NAME}
-  PRIVATE src/Data.cpp #
-          src/Data/Container.cpp #
-          src/Data/FRAM.cpp #
-          src/Data/HEAD.cpp #
-          src/Data/SKDF.cpp #
-          src/Data/SNDF.cpp #
-          src/Data/SNDT.cpp #
+  PRIVATE src/Container.cpp #
           src/Parser.cpp #
           src/Receiver.cpp #
 )
+target_include_directories(
+  ${PROJECT_NAME}
+  PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/internal_include>
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_compile_options(
   ${PROJECT_NAME}
   PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/permissive->" #
@@ -53,13 +45,7 @@ target_compile_definitions(
           "$<$<CXX_COMPILER_ID:MSVC>:_UNICODE>" #
           "$<$<CXX_COMPILER_ID:MSVC>:UNICODE>" #
 )
-
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-set_target_properties(
-  ${PROJECT_NAME}
-  PROPERTIES CXX_STANDARD_REQUIRED ON
-             CXX_EXTENSIONS OFF
-             DEBUG_POSTFIX d)
 
 install(
   TARGETS ${PROJECT_NAME}
