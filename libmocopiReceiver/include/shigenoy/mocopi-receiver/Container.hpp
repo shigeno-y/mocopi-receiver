@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-#if !defined(SHIGENOY_MOCOPIRECEIVER_DATA_Container_HPP)
-#    define SHIGENOY_MOCOPIRECEIVER_DATA_Container_HPP
+#if !defined(SHIGENOY_MOCOPIRECEIVER_CONTAINER_HPP)
+#    define SHIGENOY_MOCOPIRECEIVER_CONTAINER_HPP
 
 #    include <bit>
 #    include <cstdint>
@@ -117,6 +117,10 @@ public:
     ~ParsedMocopiPacket()                                    = default;
     ParsedMocopiPacket& operator=(const ParsedMocopiPacket&) = default;
     ParsedMocopiPacket& operator=(ParsedMocopiPacket&&)      = default;
+
+public:
+    bool hasBoneDefinition() const;
+    bool hasFrameData() const;
 };
 } // namespace shigenoy::mocopi_receiver
 

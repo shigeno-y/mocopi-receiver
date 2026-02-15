@@ -15,12 +15,16 @@ target_sources(
          BASE_DIRS
          include
          FILES
+         include/shigenoy/mocopi-receiver/Generator.hpp #
          include/shigenoy/mocopi-receiver/Container.hpp #
          include/shigenoy/mocopi-receiver/Receiver.hpp #
 )
 target_sources(
-  ${PROJECT_NAME} PRIVATE src/Container.cpp #
-                          src/Receiver.cpp #
+  ${PROJECT_NAME}
+  PRIVATE src/BoneDefinitionGenerator.cpp #
+          src/BoneTransformGenerator.cpp #
+          src/Container.cpp #
+          src/Receiver.cpp #
 )
 target_include_directories(
   ${PROJECT_NAME}
