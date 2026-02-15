@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.27)
 
@@ -48,6 +48,7 @@ project(
   VERSION ${top_project_version})
 
 add_subdirectory(libmocopiReceiver)
+add_subdirectory(tools)
 
 include(CMakePackageConfigHelpers)
 install(
