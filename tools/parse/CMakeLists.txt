@@ -29,3 +29,8 @@ find_package(CLI11 REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE CLI11::CLI11)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE shigenoy::libmocopiReceiver)
+
+if(MSVC)
+  set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT
+                                                      ${PROJECT_NAME})
+endif()
