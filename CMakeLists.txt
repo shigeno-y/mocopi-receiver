@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.27)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_DEBUG_POSTFIX d)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 execute_process(
@@ -47,8 +50,9 @@ project(
   LANGUAGES CXX
   VERSION ${top_project_version})
 
-add_subdirectory(libmocopiReceiver)
+add_subdirectory(libmocopiParser)
 add_subdirectory(tools)
+add_subdirectory(usdMocopiReceiver)
 
 include(CMakePackageConfigHelpers)
 install(

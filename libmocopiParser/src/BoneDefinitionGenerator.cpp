@@ -1,44 +1,44 @@
 // SPDX-License-Identifier: MIT
-#include <shigenoy/mocopi-receiver/Generator.hpp>
+#include <shigenoy/mocopi_parser/Generator.hpp>
 
 auto
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type::get_return_object()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type::get_return_object()
 {
     return BoneDefinitionGenerator{ *this };
 }
 
 auto
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type::initial_suspend()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type::initial_suspend()
 {
     return std::suspend_always{};
 }
 
 auto
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type::final_suspend() noexcept
+shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type::final_suspend() noexcept
 {
     return std::suspend_always{};
 }
 
 auto
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type::yield_value(BoneDefinition v)
+shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type::yield_value(BoneDefinition v)
 {
     value_ = v;
     return std::suspend_always{};
 }
 
 void
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type::return_void()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type::return_void()
 {
 }
 
 void
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type::unhandled_exception()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type::unhandled_exception()
 {
     std::terminate();
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator&
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator::operator++()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::iterator&
+shigenoy::mocopi_parser::BoneDefinitionGenerator::iterator::operator++()
 {
     coro_.resume();
     done_ = coro_.done();
@@ -46,30 +46,30 @@ shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator::operator++()
 }
 
 bool
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator::operator!=(const iterator& rhs) const
+shigenoy::mocopi_parser::BoneDefinitionGenerator::iterator::operator!=(const iterator& rhs) const
 {
     return done_ != rhs.done_;
 }
 
-shigenoy::mocopi_receiver::BoneDefinition
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator::operator*() const
+shigenoy::mocopi_parser::BoneDefinition
+shigenoy::mocopi_parser::BoneDefinitionGenerator::iterator::operator*() const
 {
     return coro_.promise().value_;
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::BoneDefinitionGenerator(
-    shigenoy::mocopi_receiver::BoneDefinitionGenerator::promise_type& p)
+shigenoy::mocopi_parser::BoneDefinitionGenerator::BoneDefinitionGenerator(
+    shigenoy::mocopi_parser::BoneDefinitionGenerator::promise_type& p)
     : coro_(coro_handle::from_promise(p))
 {
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::BoneDefinitionGenerator(
+shigenoy::mocopi_parser::BoneDefinitionGenerator::BoneDefinitionGenerator(
     BoneDefinitionGenerator&& rhs) noexcept
     : coro_(std::exchange(rhs.coro_, nullptr))
 {
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::~BoneDefinitionGenerator()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::~BoneDefinitionGenerator()
 {
     if (coro_)
     {
@@ -77,21 +77,21 @@ shigenoy::mocopi_receiver::BoneDefinitionGenerator::~BoneDefinitionGenerator()
     }
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::begin()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::iterator
+shigenoy::mocopi_parser::BoneDefinitionGenerator::begin()
 {
     coro_.resume();
     return { coro_, coro_.done() };
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::iterator
-shigenoy::mocopi_receiver::BoneDefinitionGenerator::end()
+shigenoy::mocopi_parser::BoneDefinitionGenerator::iterator
+shigenoy::mocopi_parser::BoneDefinitionGenerator::end()
 {
     return { {}, true };
 }
 
-shigenoy::mocopi_receiver::BoneDefinitionGenerator
-shigenoy::mocopi_receiver::readBoneDefinitions(const ParsedMocopiPacket& bone_definition_packet)
+shigenoy::mocopi_parser::BoneDefinitionGenerator
+shigenoy::mocopi_parser::readBoneDefinitions(const ParsedMocopiPacket& bone_definition_packet)
 {
     if (!bone_definition_packet.parsed_.contains(wellknown_code::BNDT))
     {

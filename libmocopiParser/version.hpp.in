@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+#if !defined(SHIGENOY_MOCOPIPARSER_VERSION_HPP)
+#    define SHIGENOY_MOCOPIPARSER_VERSION_HPP
+
+namespace shigenoy::mocopi_parser {
+constexpr auto library_commit_hash{ "@GIT_HASH@" };
+constexpr auto library_branch_name{ "@GIT_BRANCH@" };
+constexpr auto library_branch_name_at_commit_hash{ "@GIT_BRANCH@@@GIT_HASH@" };
+} // namespace shigenoy::mocopi_parser
+#endif

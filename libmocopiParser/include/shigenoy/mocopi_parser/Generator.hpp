@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-#if !defined(SHIGENOY_MOCOPIRECEIVER_GENERATOR_HPP)
-#    define SHIGENOY_MOCOPIRECEIVER_GENERATOR_HPP
+#if !defined(SHIGENOY_MOCOPIPARSER_GENERATOR_HPP)
+#    define SHIGENOY_MOCOPIPARSER_GENERATOR_HPP
 
-#    include <shigenoy/mocopi-receiver/Container.hpp>
+#    include <shigenoy/mocopi_parser/Container.hpp>
 
 #    include <coroutine>
 
-namespace shigenoy::mocopi_receiver {
+namespace shigenoy::mocopi_parser {
 class BoneDefinition
 {
 public:
@@ -122,6 +122,6 @@ public:
 
 BoneTransformGenerator readBoneTransforms(const ParsedMocopiPacket& boneTransformPacket);
 
-} // namespace shigenoy::mocopi_receiver
+} // namespace shigenoy::mocopi_parser
 
 #endif

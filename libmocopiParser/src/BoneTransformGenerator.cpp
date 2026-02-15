@@ -1,44 +1,44 @@
 // SPDX-License-Identifier: MIT
-#include <shigenoy/mocopi-receiver/Generator.hpp>
+#include <shigenoy/mocopi_parser/Generator.hpp>
 
 auto
-shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type::get_return_object()
+shigenoy::mocopi_parser::BoneTransformGenerator::promise_type::get_return_object()
 {
     return BoneTransformGenerator{ *this };
 }
 
 auto
-shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type::initial_suspend()
+shigenoy::mocopi_parser::BoneTransformGenerator::promise_type::initial_suspend()
 {
     return std::suspend_always{};
 }
 
 auto
-shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type::final_suspend() noexcept
+shigenoy::mocopi_parser::BoneTransformGenerator::promise_type::final_suspend() noexcept
 {
     return std::suspend_always{};
 }
 
 auto
-shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type::yield_value(BoneTransform v)
+shigenoy::mocopi_parser::BoneTransformGenerator::promise_type::yield_value(BoneTransform v)
 {
     value_ = v;
     return std::suspend_always{};
 }
 
 void
-shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type::return_void()
+shigenoy::mocopi_parser::BoneTransformGenerator::promise_type::return_void()
 {
 }
 
 void
-shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type::unhandled_exception()
+shigenoy::mocopi_parser::BoneTransformGenerator::promise_type::unhandled_exception()
 {
     std::terminate();
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator::iterator&
-shigenoy::mocopi_receiver::BoneTransformGenerator::iterator::operator++()
+shigenoy::mocopi_parser::BoneTransformGenerator::iterator&
+shigenoy::mocopi_parser::BoneTransformGenerator::iterator::operator++()
 {
     coro_.resume();
     done_ = coro_.done();
@@ -46,30 +46,30 @@ shigenoy::mocopi_receiver::BoneTransformGenerator::iterator::operator++()
 }
 
 bool
-shigenoy::mocopi_receiver::BoneTransformGenerator::iterator::operator!=(const iterator& rhs) const
+shigenoy::mocopi_parser::BoneTransformGenerator::iterator::operator!=(const iterator& rhs) const
 {
     return done_ != rhs.done_;
 }
 
-shigenoy::mocopi_receiver::BoneTransform
-shigenoy::mocopi_receiver::BoneTransformGenerator::iterator::operator*() const
+shigenoy::mocopi_parser::BoneTransform
+shigenoy::mocopi_parser::BoneTransformGenerator::iterator::operator*() const
 {
     return coro_.promise().value_;
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator::BoneTransformGenerator(
-    shigenoy::mocopi_receiver::BoneTransformGenerator::promise_type& p)
+shigenoy::mocopi_parser::BoneTransformGenerator::BoneTransformGenerator(
+    shigenoy::mocopi_parser::BoneTransformGenerator::promise_type& p)
     : coro_(coro_handle::from_promise(p))
 {
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator::BoneTransformGenerator(
+shigenoy::mocopi_parser::BoneTransformGenerator::BoneTransformGenerator(
     BoneTransformGenerator&& rhs) noexcept
     : coro_(std::exchange(rhs.coro_, nullptr))
 {
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator::~BoneTransformGenerator()
+shigenoy::mocopi_parser::BoneTransformGenerator::~BoneTransformGenerator()
 {
     if (coro_)
     {
@@ -77,21 +77,21 @@ shigenoy::mocopi_receiver::BoneTransformGenerator::~BoneTransformGenerator()
     }
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator::iterator
-shigenoy::mocopi_receiver::BoneTransformGenerator::begin()
+shigenoy::mocopi_parser::BoneTransformGenerator::iterator
+shigenoy::mocopi_parser::BoneTransformGenerator::begin()
 {
     coro_.resume();
     return { coro_, coro_.done() };
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator::iterator
-shigenoy::mocopi_receiver::BoneTransformGenerator::end()
+shigenoy::mocopi_parser::BoneTransformGenerator::iterator
+shigenoy::mocopi_parser::BoneTransformGenerator::end()
 {
     return { {}, true };
 }
 
-shigenoy::mocopi_receiver::BoneTransformGenerator
-shigenoy::mocopi_receiver::readBoneTransforms(const ParsedMocopiPacket& bone_transform_packet)
+shigenoy::mocopi_parser::BoneTransformGenerator
+shigenoy::mocopi_parser::readBoneTransforms(const ParsedMocopiPacket& bone_transform_packet)
 {
     if (!bone_transform_packet.parsed_.contains(wellknown_code::BTDT))
     {

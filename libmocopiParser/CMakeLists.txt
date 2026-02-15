@@ -2,10 +2,14 @@
 
 cmake_minimum_required(VERSION 3.27)
 
-project(libmocopiReceiver LANGUAGES CXX)
+project(libmocopiParser LANGUAGES CXX)
 
 add_library(${PROJECT_NAME})
 add_library(shigenoy::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.hpp.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/version.hpp" @ONLY)
+
 target_sources(
   ${PROJECT_NAME}
   PUBLIC FILE_SET
@@ -15,9 +19,20 @@ target_sources(
          BASE_DIRS
          include
          FILES
-         include/shigenoy/mocopi-receiver/Generator.hpp #
-         include/shigenoy/mocopi-receiver/Container.hpp #
-         include/shigenoy/mocopi-receiver/Receiver.hpp #
+         include/shigenoy/mocopi_parser/Generator.hpp #
+         include/shigenoy/mocopi_parser/Container.hpp #
+         include/shigenoy/mocopi_parser/Receiver.hpp #
+)
+target_sources(
+  ${PROJECT_NAME}
+  PRIVATE FILE_SET
+          dynamic_headers
+          TYPE
+          HEADERS
+          BASE_DIRS
+          ${CMAKE_CURRENT_BINARY_DIR}
+          FILES
+          ${CMAKE_CURRENT_BINARY_DIR}/version.hpp #
 )
 target_sources(
   ${PROJECT_NAME}
@@ -29,6 +44,7 @@ target_sources(
 target_include_directories(
   ${PROJECT_NAME}
   PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/internal_include>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_compile_options(
   ${PROJECT_NAME}
