@@ -1,28 +1,11 @@
 // SPDX-License-Identifier: MIT
 
 #include "receiver.hpp"
+#include "logic.hpp"
 #include "tokens.hpp"
 
-#include <chrono>
+#include <string>
 #include <thread>
-
-#include "pxr/usd/pcp/dynamicFileFormatContext.h"
-#include "pxr/usd/usdGeom/scope.h"
-
-namespace {
-void
-invokeWorkerThread(pxr::SdfLayer* layer)
-{
-    std::this_thread::sleep_for(std::chrono::seconds{ 30 });
-    pxr::SdfLayerHandle handle{ layer };
-
-    auto stage = pxr::UsdStage::CreateInMemory();
-    auto root  = pxr::UsdGeomScope::Define(stage, pxr::SdfPath{ "/hogehgoe" });
-    stage->SetDefaultPrim(root.GetPrim());
-
-    layer->TransferContent(stage->GetRootLayer());
-}
-} // namespace
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -56,8 +39,19 @@ UsdMocopiReceiverFileFormat::Read(SdfLayer* layer,
                                   const std::string& resolved_path,
                                   bool metadata_only) const
 {
-    std::thread worker{ invokeWorkerThread, layer };
-    worker.detach();
+    const auto& args = layer->GetFileFormatArguments();
+    pxr::SdfLayerHandle handle{ layer };
+
+    if (handle)
+    {
+        auto root_prim_spec =
+            pxr::SdfPrimSpec::New(handle, "Root", pxr::SdfSpecifier::SdfSpecifierDef);
+        root_prim_spec->SetTypeName("Scope");
+        handle->SetDefaultPrim(root_prim_spec->GetNameToken());
+        std::thread worker{ shigenoy::mocopi_parser::invokeWorkerThread, handle, args };
+        worker.detach();
+        //worker.join();
+    }
     return true;
 }
 

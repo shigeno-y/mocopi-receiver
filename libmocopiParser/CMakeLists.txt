@@ -22,6 +22,7 @@ target_sources(
          include/shigenoy/mocopi_parser/Generator.hpp #
          include/shigenoy/mocopi_parser/Container.hpp #
          include/shigenoy/mocopi_parser/Receiver.hpp #
+         include/shigenoy/mocopi_parser/Skeleton.hpp #
 )
 target_sources(
   ${PROJECT_NAME}
@@ -40,6 +41,7 @@ target_sources(
           src/BoneTransformGenerator.cpp #
           src/Container.cpp #
           src/Receiver.cpp #
+          src/Skeleton.cpp #
 )
 target_include_directories(
   ${PROJECT_NAME}
@@ -63,6 +65,9 @@ target_compile_definitions(
           "$<$<CXX_COMPILER_ID:MSVC>:UNICODE>" #
 )
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+
+find_package(pxr CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC usd usdSkel)
 
 install(
   TARGETS ${PROJECT_NAME}

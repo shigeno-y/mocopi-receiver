@@ -28,12 +28,15 @@ target_sources(
           include/api.h #
           include/receiver.hpp #
           include/tokens.hpp #
+          internal_include/logic.hpp #
+          src/logic.cpp #
           src/receiver.cpp #
           src/tokens.cpp #
 )
 target_include_directories(
   ${PROJECT_NAME}
-  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/internal_include>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 if(MSVC)
   target_sources(${PROJECT_NAME} PRIVATE utf8.manifest)

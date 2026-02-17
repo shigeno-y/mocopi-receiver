@@ -76,3 +76,15 @@ shigenoy::mocopi_parser::ParsedMocopiPacket::ParsedMocopiPacket(const std::vecto
         offset += c.getSize();
     }
 }
+
+bool
+shigenoy::mocopi_parser::ParsedMocopiPacket::hasBoneDefinition() const
+{
+    return this->parsed_.contains(wellknown_code::BNDT);
+}
+
+bool
+shigenoy::mocopi_parser::ParsedMocopiPacket::hasFrameData() const
+{
+    return this->parsed_.contains(wellknown_code::BTDT);
+}

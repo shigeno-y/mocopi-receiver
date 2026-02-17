@@ -4,10 +4,11 @@
 
 #    include "pxr/base/tf/staticTokens.h"
 #    include "pxr/pxr.h"
+#    include "pxr/usd/pcp/dynamicFileFormatContext.h"
 #    include "pxr/usd/pcp/dynamicFileFormatInterface.h"
 #    include "pxr/usd/sdf/fileFormat.h"
+#    include "pxr/usd/usdGeom/scope.h"
 
-#    include <iosfwd>
 #    include <string>
 
 PXR_NAMESPACE_OPEN_SCOPE

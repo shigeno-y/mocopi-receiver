@@ -2,6 +2,7 @@
 
 #include <shigenoy/mocopi_parser/Container.hpp>
 #include <shigenoy/mocopi_parser/Generator.hpp>
+#include <shigenoy/mocopi_parser/Skeleton.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -43,7 +44,7 @@ main(int argc, char* argv[])
             {
                 const shigenoy::mocopi_parser::ParsedMocopiPacket p{ buf };
 
-                if (p.parsed_.contains(shigenoy::mocopi_parser::wellknown_code::BNDT))
+                if (p.hasBoneDefinition())
                 {
                     // Bone Definition
                     for (const auto& b : shigenoy::mocopi_parser::readBoneDefinitions(p))
@@ -59,8 +60,17 @@ main(int argc, char* argv[])
                         std::cout << b.tran_y_ << ", ";
                         std::cout << b.tran_z_ << "})\n";
                     }
+                    {
+                        auto stage     = pxr::UsdStage::CreateInMemory();
+                        auto skel_root = pxr::UsdSkelRoot::Define(stage, pxr::SdfPath{ "/Skel" });
+                        stage->SetDefaultPrim(skel_root.GetPrim());
+
+                        shigenoy::mocopi_parser::generateSkeleton(stage, skel_root, p);
+                        stage->Flatten()->Export(
+                            std::filesystem::path{ "T:/hogehoge.usda" }.generic_string());
+                    }
                 }
-                else if (p.parsed_.contains(shigenoy::mocopi_parser::wellknown_code::BTDT))
+                else if (p.hasFrameData())
                 {
                     // Frame Data
                     for (const auto& b : shigenoy::mocopi_parser::readBoneTransforms(p))
