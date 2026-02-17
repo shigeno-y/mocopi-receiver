@@ -43,6 +43,7 @@ main(int argc, char* argv[])
             if (ifs)
             {
                 const shigenoy::mocopi_parser::ParsedMocopiPacket p{ buf };
+                std::vector<pxr::TfToken> joints;
 
                 if (p.hasBoneDefinition())
                 {
@@ -65,7 +66,7 @@ main(int argc, char* argv[])
                         auto skel_root = pxr::UsdSkelRoot::Define(stage, pxr::SdfPath{ "/Skel" });
                         stage->SetDefaultPrim(skel_root.GetPrim());
 
-                        shigenoy::mocopi_parser::generateSkeleton(stage, skel_root, p);
+                        shigenoy::mocopi_parser::generateSkelRoot(stage, skel_root, joints, p);
                         stage->Flatten()->Export(
                             std::filesystem::path{ "T:/hogehoge.usda" }.generic_string());
                     }
@@ -84,6 +85,15 @@ main(int argc, char* argv[])
                         std::cout << b.tran_x_ << ", ";
                         std::cout << b.tran_y_ << ", ";
                         std::cout << b.tran_z_ << "})\n";
+                    }
+                    {
+                        auto stage     = pxr::UsdStage::CreateInMemory();
+                        auto skel_root = pxr::UsdSkelRoot::Define(stage, pxr::SdfPath{ "/Skel" });
+                        stage->SetDefaultPrim(skel_root.GetPrim());
+
+                        shigenoy::mocopi_parser::generateSkelAnim(stage, skel_root, joints, p);
+                        stage->Flatten()->Export(
+                            std::filesystem::path{ "T:/hogehoge.usda" }.generic_string());
                     }
                 }
             }

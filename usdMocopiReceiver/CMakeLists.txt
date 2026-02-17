@@ -59,13 +59,6 @@ target_compile_definitions(
 )
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
-find_package(sockpp REQUIRED)
-if(BUILD_SHARED_LIBS)
-  target_link_libraries(${PROJECT_NAME} PRIVATE Sockpp::sockpp)
-else()
-  target_link_libraries(${PROJECT_NAME} PRIVATE Sockpp::sockpp-static)
-endif()
-
 find_package(pxr CONFIG REQUIRED)
 target_link_libraries(
   ${PROJECT_NAME}

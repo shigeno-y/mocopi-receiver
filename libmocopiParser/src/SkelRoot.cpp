@@ -244,13 +244,14 @@ buildMappedName(Node& root)
 } // namespace
 
 void
-shigenoy::mocopi_parser::generateSkeleton(pxr::UsdStageRefPtr stage,
+shigenoy::mocopi_parser::generateSkelRoot(pxr::UsdStageRefPtr stage,
                                           pxr::UsdSkelRoot& skel_root,
+                                          std::vector<pxr::TfToken>& joints,
                                           const ParsedMocopiPacket& bone_definition_packet)
 {
     std::vector<pxr::GfMatrix4d> bind_transforms;
     std::vector<pxr::TfToken> joint_names;
-    std::vector<pxr::TfToken> joints;
+    // std::vector<pxr::TfToken> joints;
     std::vector<pxr::GfMatrix4d> rest_transforms;
 
     std::set<BoneDefinition> bones;
@@ -268,6 +269,9 @@ shigenoy::mocopi_parser::generateSkeleton(pxr::UsdStageRefPtr stage,
             stage, skel_root.GetPath().AppendChild(pxr::TfToken{ "Skeleton" }));
 
         skeleton.GetPurposeAttr().Set(pxr::UsdGeomTokens->guide);
+        skeleton.GetPrim()
+            .GetRelationship(pxr::TfToken{ "skel:animationSource" })
+            .SetTargets({ skel_root.GetPath().AppendChild(pxr::TfToken{ "Motion" }) });
 
         {
             const auto& arr = bind_transforms;

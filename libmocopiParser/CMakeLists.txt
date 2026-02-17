@@ -41,7 +41,8 @@ target_sources(
           src/BoneTransformGenerator.cpp #
           src/Container.cpp #
           src/Receiver.cpp #
-          src/Skeleton.cpp #
+          src/SkelAnim.cpp #
+          src/SkelRoot.cpp #
 )
 target_include_directories(
   ${PROJECT_NAME}
@@ -65,6 +66,14 @@ target_compile_definitions(
           "$<$<CXX_COMPILER_ID:MSVC>:UNICODE>" #
 )
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+
+find_package(Threads REQUIRED)
+find_package(sockpp REQUIRED)
+if(BUILD_SHARED_LIBS)
+  target_link_libraries(${PROJECT_NAME} PRIVATE Sockpp::sockpp)
+else()
+  target_link_libraries(${PROJECT_NAME} PRIVATE Sockpp::sockpp-static)
+endif()
 
 find_package(pxr CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC usd usdSkel)
