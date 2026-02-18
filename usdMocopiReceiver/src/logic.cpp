@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: MIT
-
 #include "logic.hpp"
+
+#include "Skeleton.hpp"
 #include "tokens.hpp"
 
-#include "pxr/usd/usdGeom/cube.h"
-#include "pxr/usd/usdGeom/scope.h"
+#include <shigenoy/mocopi_parser/Receiver.hpp>
 
 #include <chrono>
 #include <cstdint>
-#include <random>
+#include <iostream>
 #include <thread>
 
 void
 shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
                                             const pxr::SdfFileFormat::FileFormatArguments& args)
 {
-    std::random_device seed_gen;
-    std::default_random_engine engine(seed_gen());
-    std::uniform_real_distribution<double> dist(.1, 2.1);
+    constexpr std::chrono::milliseconds WAIT{ 8 };
+    std::string host{ "127.0.0.1" };
+    std::uint16_t port{ 12351 };
 
-    std::string host;
-    std::uint16_t port = 0;
-
+    oneapi::tbb::concurrent_unordered_map<std::string,
+                                          oneapi::tbb::concurrent_queue<ParsedMocopiPacket>>
+        queue;
     {
         const auto& listen_host = args.find(shigenoy::mocopi_parser::tokens->listen_host);
         if (listen_host != args.cend())
@@ -37,19 +37,48 @@ shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
         }
     }
 
+    std::vector<pxr::TfToken> joints;
+    ParsedMocopiPacket packet{};
+
     auto stage = pxr::UsdStage::CreateInMemory();
 
-    auto root_prim = pxr::UsdGeomScope::Define(stage, pxr::SdfPath{ "/Root" });
-    stage->SetDefaultPrim(root_prim.GetPrim());
+    auto skel_root = pxr::UsdSkelRoot::Define(stage, pxr::SdfPath{ "/Skel" });
+    stage->SetDefaultPrim(skel_root.GetPrim());
 
-    auto box =
-        pxr::UsdGeomCube::Define(stage, root_prim.GetPath().AppendChild(pxr::TfToken{ "box" }));
+    shigenoy::mocopi_parser::receiveMocopiUdp(host, port, queue);
 
-    for (int ctr = 0; ctr < 1024; ++ctr)
+    auto mocopi = queue.begin();
+    while (mocopi == queue.end())
     {
-        box.GetSizeAttr().Set(dist(engine));
+        std::this_thread::sleep_for(WAIT);
+        mocopi = queue.begin();
+    }
 
-        handle->TransferContent(stage->GetRootLayer());
-        std::this_thread::sleep_for(std::chrono::milliseconds{ 100 });
+    std::cerr << mocopi->first << "\n";
+
+    for (;;)
+    {
+        while (!mocopi->second.try_pop(packet))
+        {
+            std::this_thread::sleep_for(WAIT);
+        }
+        if (packet.hasBoneDefinition())
+        {
+            generateSkelRoot(stage, skel_root, joints, packet);
+            break;
+        }
+    }
+
+    for (;;)
+    {
+        while (!mocopi->second.try_pop(packet))
+        {
+            std::this_thread::sleep_for(WAIT);
+        }
+        if (packet.hasFrameData())
+        {
+            generateSkelAnim(stage, skel_root, joints, packet);
+            handle->TransferContent(stage->GetRootLayer());
+        }
     }
 }

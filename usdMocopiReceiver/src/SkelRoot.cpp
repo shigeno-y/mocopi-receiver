@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
-#include <shigenoy/mocopi_parser/Skeleton.hpp>
+#include "Skeleton.hpp"
 
 #include <shigenoy/mocopi_parser/Generator.hpp>
 
 #include <array>
 #include <filesystem>
-#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -215,9 +214,8 @@ generateSkelData(const Node& root,
             generateSkelData(c, bind_transforms, joint_names, joints, rest_transforms);
         }
     }
-    catch (const std::exception& e)
+    catch (...)
     {
-        std::cerr << e.what() << "\n";
     }
 }
 
@@ -267,9 +265,8 @@ shigenoy::mocopi_parser::generateSkelRoot(pxr::UsdStageRefPtr stage,
     {
         auto skeleton = pxr::UsdSkelSkeleton::Define(
             stage, skel_root.GetPath().AppendChild(pxr::TfToken{ "Skeleton" }));
-
         skeleton.GetPurposeAttr().Set(pxr::UsdGeomTokens->guide);
-        skeleton.GetPrim()
+        skel_root.GetPrim()
             .GetRelationship(pxr::TfToken{ "skel:animationSource" })
             .SetTargets({ skel_root.GetPath().AppendChild(pxr::TfToken{ "Motion" }) });
 

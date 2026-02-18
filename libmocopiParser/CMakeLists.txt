@@ -22,7 +22,6 @@ target_sources(
          include/shigenoy/mocopi_parser/Generator.hpp #
          include/shigenoy/mocopi_parser/Container.hpp #
          include/shigenoy/mocopi_parser/Receiver.hpp #
-         include/shigenoy/mocopi_parser/Skeleton.hpp #
 )
 target_sources(
   ${PROJECT_NAME}
@@ -41,8 +40,6 @@ target_sources(
           src/BoneTransformGenerator.cpp #
           src/Container.cpp #
           src/Receiver.cpp #
-          src/SkelAnim.cpp #
-          src/SkelRoot.cpp #
 )
 target_include_directories(
   ${PROJECT_NAME}
@@ -68,15 +65,23 @@ target_compile_definitions(
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 find_package(Threads REQUIRED)
-find_package(sockpp REQUIRED)
-if(BUILD_SHARED_LIBS)
-  target_link_libraries(${PROJECT_NAME} PRIVATE Sockpp::sockpp)
-else()
-  target_link_libraries(${PROJECT_NAME} PRIVATE Sockpp::sockpp-static)
-endif()
+
+find_package(Poco REQUIRED COMPONENTS Net)
+target_link_libraries(${PROJECT_NAME} PRIVATE Poco::Net)
 
 find_package(pxr CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC usd usdSkel)
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE usdGeom
+          usdSkel
+          tf
+          gf
+          sdf
+          usd
+          ar
+          arch
+          js
+          vt)
 
 install(
   TARGETS ${PROJECT_NAME}

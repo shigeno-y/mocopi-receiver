@@ -106,12 +106,16 @@ public:
 
 class ParsedMocopiPacket
 {
+private:
+    std::vector<std::byte> raw_;
+
 public:
-    const std::vector<std::byte>& raw_;
     std::unordered_multimap<std::uint32_t, Container> parsed_;
 
 public:
     ParsedMocopiPacket(const std::vector<std::byte>& raw);
+
+    ParsedMocopiPacket()                                     = default;
     ParsedMocopiPacket(const ParsedMocopiPacket&)            = default;
     ParsedMocopiPacket(ParsedMocopiPacket&&)                 = default;
     ~ParsedMocopiPacket()                                    = default;

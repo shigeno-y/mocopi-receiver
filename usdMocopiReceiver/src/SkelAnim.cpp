@@ -1,16 +1,10 @@
 // SPDX-License-Identifier: MIT
-#include <shigenoy/mocopi_parser/Skeleton.hpp>
+#include <Skeleton.hpp>
 
 #include <shigenoy/mocopi_parser/Generator.hpp>
 
-#include <array>
-#include <filesystem>
-#include <iostream>
-#include <set>
-#include <string>
 #include <vector>
 
-#include "pxr/base/gf/matrix4d.h"
 #include "pxr/usd/usdSkel/animation.h"
 
 void
@@ -40,6 +34,9 @@ shigenoy::mocopi_parser::generateSkelAnim(pxr::UsdStageRefPtr stage,
             bone_transform_packet.parsed_.equal_range(wellknown_code::FNUM).first->second;
         double timecode = fnum.readAs<std::uint32_t>(0);
 
+        stage->SetStartTimeCode(std::min(timecode, stage->GetStartTimeCode()));
+        stage->SetEndTimeCode(std::max(timecode, stage->GetEndTimeCode()));
+
         for (const auto& bone : readBoneTransforms(bone_transform_packet))
         {
             initial_rotations.emplace_back(bone.quat_w_, bone.quat_x_, bone.quat_y_, bone.quat_z_);
@@ -55,8 +52,7 @@ shigenoy::mocopi_parser::generateSkelAnim(pxr::UsdStageRefPtr stage,
                                                                       initial_translations.cend() },
             timecode);
     }
-    catch (const std::exception& e)
+    catch (...)
     {
-        std::cerr << e.what() << "\n";
     }
 }

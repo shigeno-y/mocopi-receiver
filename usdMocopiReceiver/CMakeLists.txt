@@ -29,8 +29,11 @@ target_sources(
           include/receiver.hpp #
           include/tokens.hpp #
           internal_include/logic.hpp #
+          internal_include/Skeleton.hpp #
           src/logic.cpp #
           src/receiver.cpp #
+          src/SkelAnim.cpp #
+          src/SkelRoot.cpp #
           src/tokens.cpp #
 )
 target_include_directories(

@@ -1,73 +1,120 @@
 // SPDX-License-Identifier: MIT
 #include <shigenoy/mocopi_parser/Receiver.hpp>
 
-#include <shigenoy/mocopi_parser/Container.hpp>
-#include <shigenoy/mocopi_parser/Generator.hpp>
-#include <shigenoy/mocopi_parser/Skeleton.hpp>
+#include "Poco/Net/DatagramSocket.h"
+#include "Poco/Net/SocketAddress.h"
+#include "Poco/Thread.h"
 
-#include "sockpp/udp_socket.h"
-
-#include <atomic>
 #include <thread>
 #include <vector>
 
 namespace {
-void
-run_echo(sockpp::udp_socket sock, pxr::UsdStageRefPtr stage, pxr::UsdSkelRoot& skel_root)
+class MyUDPServer : public Poco::Runnable
+/// A simple sequential UDP echo server.
 {
-    std::atomic<bool> skeleton_defined{ false };
-    std::vector<std::byte> buf;
-    buf.resize(2048);
+private:
+    oneapi::tbb::concurrent_unordered_map<
+        std::string,
+        oneapi::tbb::concurrent_queue<shigenoy::mocopi_parser::ParsedMocopiPacket>>& queues_;
 
-    // Each UDP socket type knows its address type as `addr_t`
-    typename sockpp::udp_socket::addr_t srcAddr;
+public:
+    MyUDPServer(
+        const Poco::Net::SocketAddress& sa,
+        oneapi::tbb::concurrent_unordered_map<
+            std::string,
+            oneapi::tbb::concurrent_queue<shigenoy::mocopi_parser::ParsedMocopiPacket>>& queues);
+    /// Creates the UDPEchoServer and binds it to
+    /// the given address.
 
-    // Read some data, also getting the address of the sender,
-    // then just send it back.
-    while (true)
+    ~MyUDPServer() override;
+    /// Destroys the UDPEchoServer.
+
+    Poco::UInt16 port() const;
+    /// Returns the port the echo server is
+    /// listening on.
+
+    Poco::Net::SocketAddress address() const;
+    /// Returns the address of the server.
+
+    void run() override;
+    /// Does the work.
+
+private:
+    Poco::Net::DatagramSocket socket_;
+    Poco::Thread thread_;
+    Poco::Event ready_;
+    std::atomic<bool> stop_;
+};
+
+MyUDPServer::MyUDPServer(
+    const Poco::Net::SocketAddress& sa,
+    oneapi::tbb::concurrent_unordered_map<
+        std::string,
+        oneapi::tbb::concurrent_queue<shigenoy::mocopi_parser::ParsedMocopiPacket>>& queues)
+    : thread_("UDPEchoServer"), stop_(false), queues_(queues)
+{
+    socket_.bind(sa, true);
+    thread_.start(*this);
+    ready_.wait();
+}
+
+MyUDPServer::~MyUDPServer()
+{
+    stop_ = true;
+    thread_.join();
+}
+
+Poco::UInt16
+MyUDPServer::port() const
+{
+    return socket_.address().port();
+}
+
+void
+MyUDPServer::run()
+{
+    std::vector<std::byte> buffer;
+    Poco::Timespan span(250000);
+    Poco::Net::SocketAddress sender;
+
+    buffer.resize(2048);
+    while (!stop_)
     {
-        auto res = sock.recv_from(buf.data(), buf.size(), &srcAddr);
-        if (!res || res == 0)
+        ready_.set();
+        if (socket_.poll(span, Poco::Net::Socket::SELECT_READ))
         {
-            break;
-        }
-
-        const ParsedMocopiPacket p{ buf };
-        std::vector<pxr::TfToken> joints;
-
-        if (p.hasFrameData())
-        {
-            // Frame Data
-            generateSkelAnim(stage, skel_root, joints, p);
-        }
-        else if (!skeleton_defined && p.hasBoneDefinition())
-        {
-            // Bone Definition
-            skeleton_defined = true;
-            generateSkelRoot(stage, skel_root, joints, p);
+            try
+            {
+                int n = socket_.receiveFrom(buffer.data(), buffer.size(), sender);
+                this->queues_[sender.toString()].push(
+                    shigenoy::mocopi_parser::ParsedMocopiPacket{ buffer });
+            }
+            catch (...)
+            {
+            }
         }
     }
+}
+
+Poco::Net::SocketAddress
+MyUDPServer::address() const
+{
+    return socket_.address();
 }
 } // namespace
 
 void
-shigenoy::mocopi_parser::receiveMocopiUdp(pxr::UsdStageRefPtr stage,
-                                          pxr::UsdSkelRoot& skel_root,
-                                          const std::string& host,
-                                          std::uint16_t port)
+shigenoy::mocopi_parser::receiveMocopiUdp(
+    const std::string& listen_addr,
+    std::uint16_t listen_port,
+    oneapi::tbb::concurrent_unordered_map<std::string,
+                                          oneapi::tbb::concurrent_queue<ParsedMocopiPacket>>&
+        queues)
 {
-    sockpp::initialize();
-    sockpp::udp_socket udpsock;
-
-    int timeout{ 10000 };
-    udpsock.set_option(SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-
-    auto res = udpsock.bind(sockpp::inet_address(host, port));
-    if (!res)
-    {
-        return;
-    }
-
-    std::thread t{ run_echo, std::move(udpsock), stage, skel_root };
-    t.detach();
+    std::thread th{ [=, &queues]() {
+        Poco::Net::SocketAddress sa{ listen_addr, listen_port };
+        MyUDPServer server{ sa, queues };
+        server.run();
+    } };
+    th.detach();
 }

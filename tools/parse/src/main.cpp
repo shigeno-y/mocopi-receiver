@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-#include <shigenoy/mocopi_parser/Container.hpp>
-#include <shigenoy/mocopi_parser/Generator.hpp>
-#include <shigenoy/mocopi_parser/Skeleton.hpp>
-
 #include <filesystem>
 #include <iostream>
-#include <vector>
 
 #include <CLI/CLI.hpp>
 
@@ -29,7 +24,7 @@ main(int argc, char* argv[])
         {
             return app.exit(e);
         }
-
+        /*
         if (std::filesystem::exists(packet_file_path))
         {
             std::ifstream ifs{ packet_file_path, std::ios::in | std::ios::binary };
@@ -98,6 +93,7 @@ main(int argc, char* argv[])
                 }
             }
         }
+        // */
     }
     catch (const std::exception& e)
     {
