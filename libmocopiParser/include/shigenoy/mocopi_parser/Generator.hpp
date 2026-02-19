@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
-#if !defined(SHIGENOY_MOCOPIRECEIVER_GENERATOR_HPP)
-#    define SHIGENOY_MOCOPIRECEIVER_GENERATOR_HPP
+#if !defined(SHIGENOY_MOCOPIPARSER_GENERATOR_HPP)
+#    define SHIGENOY_MOCOPIPARSER_GENERATOR_HPP
 
-#    include <shigenoy/mocopi-receiver/Container.hpp>
+#    include <shigenoy/mocopi_parser/Container.hpp>
 
 #    include <coroutine>
+#    include <functional>
 
-namespace shigenoy::mocopi_receiver {
+namespace shigenoy::mocopi_parser {
 class BoneDefinition
 {
 public:
@@ -122,6 +123,62 @@ public:
 
 BoneTransformGenerator readBoneTransforms(const ParsedMocopiPacket& boneTransformPacket);
 
-} // namespace shigenoy::mocopi_receiver
+} // namespace shigenoy::mocopi_parser
+
+namespace std {
+template <>
+struct less<shigenoy::mocopi_parser::BoneDefinition>
+{
+    constexpr bool operator()(const shigenoy::mocopi_parser::BoneDefinition& x,
+                              const shigenoy::mocopi_parser::BoneDefinition& y) const
+    {
+        if (x.pbid_ != y.pbid_)
+        {
+            if (x.pbid_ == std::numeric_limits<std::uint16_t>::max())
+            {
+                return true;
+            }
+            else if (y.pbid_ == std::numeric_limits<std::uint16_t>::max())
+            {
+                return false;
+            }
+            else
+            {
+                return x.pbid_ < y.pbid_;
+            }
+        }
+        else
+        {
+            return x.bnid_ < y.bnid_;
+        }
+    }
+};
+template <>
+struct hash<shigenoy::mocopi_parser::BoneDefinition>
+{
+    constexpr bool operator()(const shigenoy::mocopi_parser::BoneDefinition& x) const
+    {
+        return static_cast<size_t>(x.bnid_);
+    }
+};
+
+template <>
+struct less<shigenoy::mocopi_parser::BoneTransform>
+{
+    constexpr bool operator()(const shigenoy::mocopi_parser::BoneTransform& x,
+                              const shigenoy::mocopi_parser::BoneTransform& y) const
+    {
+        return x.bnid_ < y.bnid_;
+    }
+};
+template <>
+struct hash<shigenoy::mocopi_parser::BoneTransform>
+{
+    constexpr bool operator()(const shigenoy::mocopi_parser::BoneTransform& x) const
+    {
+        return static_cast<size_t>(x.bnid_);
+    }
+};
+} // namespace std
 
 #endif

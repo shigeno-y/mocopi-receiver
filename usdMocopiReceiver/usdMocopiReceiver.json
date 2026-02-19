@@ -1,0 +1,46 @@
+{
+    "Plugins": [
+        {
+            "Info": {
+                "SdfMetadata": {
+                    "listenHost": {
+                        "type": "string",
+                        "default": "127.0.0.1",
+                        "displayGroup": "Core",
+                        "appliesTo": ["prims", "layers"],
+                        "documentation:": "Listen Host for Mocopi UDP"
+                    },
+                    "listenPort": {
+                        "type": "uint",
+                        "default": 12351,
+                        "displayGroup": "Core",
+                        "appliesTo": ["prims", "layers"],
+                        "documentation:": "Listen Port for Mocopi UDP"
+                    }
+                },
+                "Types": {
+                    "UsdMocopiReceiverFileFormat": {
+                        "bases": [
+                            "SdfFileFormat"
+                        ],
+                        "displayName": "USD FileFormatPlugin to receive Mocopi UDP",
+                        "supportsReading":true,
+                        "supportsWriting": false,
+                        "supportsEditing": true,
+                        "extensions": [
+                            "mocopi"
+                        ],
+                        "formatId": "mocopi",
+                        "primary": true,
+                        "target": "usd"
+                    }
+                }
+            },
+            "LibraryPath": "../$<TARGET_FILE_NAME:@PROJECT_NAME@>",
+            "Name": "usdMocopiReceiver",
+            "ResourcePath": "resources",
+            "Root": "..",
+            "Type": "library"
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-#if !defined(SHIGENOY_MOCOPIRECEIVER_CONTAINER_HPP)
-#    define SHIGENOY_MOCOPIRECEIVER_CONTAINER_HPP
+#if !defined(SHIGENOY_MOCOPIPARSER_CONTAINER_HPP)
+#    define SHIGENOY_MOCOPIPARSER_CONTAINER_HPP
 
 #    include <bit>
 #    include <cstdint>
@@ -9,7 +9,7 @@
 #    include <unordered_map>
 #    include <vector>
 
-namespace shigenoy::mocopi_receiver {
+namespace shigenoy::mocopi_parser {
 template <size_t Length>
 struct CCCode
 {
@@ -33,45 +33,45 @@ CCCode(const char (&)[Length]) -> CCCode<Length - 1>;
 
 inline namespace wellknown_code {
 // /head
-constexpr shigenoy::mocopi_receiver::CCCode HEAD{ "head" };
+constexpr shigenoy::mocopi_parser::CCCode HEAD{ "head" };
 // /head/ftyp
-constexpr shigenoy::mocopi_receiver::CCCode FTYP{ "ftyp" };
+constexpr shigenoy::mocopi_parser::CCCode FTYP{ "ftyp" };
 // /head/vrsn
-constexpr shigenoy::mocopi_receiver::CCCode VRSN{ "vrsn" };
+constexpr shigenoy::mocopi_parser::CCCode VRSN{ "vrsn" };
 // /sndf
-constexpr shigenoy::mocopi_receiver::CCCode SNDF{ "sndf" };
+constexpr shigenoy::mocopi_parser::CCCode SNDF{ "sndf" };
 // /sndf/ipad
-constexpr shigenoy::mocopi_receiver::CCCode IPAD{ "ipad" };
+constexpr shigenoy::mocopi_parser::CCCode IPAD{ "ipad" };
 // /sndf/rcvp
-constexpr shigenoy::mocopi_receiver::CCCode RCVP{ "rcvp" };
+constexpr shigenoy::mocopi_parser::CCCode RCVP{ "rcvp" };
 // /skdf/bons/bndt/bnid
 // /fram/btrs/btdt/bnid
-constexpr shigenoy::mocopi_receiver::CCCode BNID{ "bnid" };
+constexpr shigenoy::mocopi_parser::CCCode BNID{ "bnid" };
 // /skdf/bons/bndt/tran
 // /fram/btrs/btdt/tran
-constexpr shigenoy::mocopi_receiver::CCCode TRAN{ "tran" };
+constexpr shigenoy::mocopi_parser::CCCode TRAN{ "tran" };
 // /skdf
-constexpr shigenoy::mocopi_receiver::CCCode SKDF{ "skdf" };
+constexpr shigenoy::mocopi_parser::CCCode SKDF{ "skdf" };
 // /skdf/bons
-constexpr shigenoy::mocopi_receiver::CCCode BONS{ "bons" };
+constexpr shigenoy::mocopi_parser::CCCode BONS{ "bons" };
 // /skdf/bons/bndt
-constexpr shigenoy::mocopi_receiver::CCCode BNDT{ "bndt" };
+constexpr shigenoy::mocopi_parser::CCCode BNDT{ "bndt" };
 // /skdf/bons/bndt/pbid
-constexpr shigenoy::mocopi_receiver::CCCode PBID{ "pbid" };
+constexpr shigenoy::mocopi_parser::CCCode PBID{ "pbid" };
 // /fram
-constexpr shigenoy::mocopi_receiver::CCCode FRAM{ "fram" };
+constexpr shigenoy::mocopi_parser::CCCode FRAM{ "fram" };
 // /fram/fnum
-constexpr shigenoy::mocopi_receiver::CCCode FNUM{ "fnum" };
+constexpr shigenoy::mocopi_parser::CCCode FNUM{ "fnum" };
 // /fram/time
-constexpr shigenoy::mocopi_receiver::CCCode TIME{ "time" };
+constexpr shigenoy::mocopi_parser::CCCode TIME{ "time" };
 // /fram/uttm
-constexpr shigenoy::mocopi_receiver::CCCode UTTM{ "uttm" };
+constexpr shigenoy::mocopi_parser::CCCode UTTM{ "uttm" };
 // /fram/tmcd
-constexpr shigenoy::mocopi_receiver::CCCode TMCD{ "tmcd" };
+constexpr shigenoy::mocopi_parser::CCCode TMCD{ "tmcd" };
 // /fram/btrs
-constexpr shigenoy::mocopi_receiver::CCCode BTRS{ "btrs" };
+constexpr shigenoy::mocopi_parser::CCCode BTRS{ "btrs" };
 // /fram/btrs/btdt
-constexpr shigenoy::mocopi_receiver::CCCode BTDT{ "btdt" };
+constexpr shigenoy::mocopi_parser::CCCode BTDT{ "btdt" };
 } // namespace wellknown_code
 
 class Container
@@ -106,12 +106,16 @@ public:
 
 class ParsedMocopiPacket
 {
+private:
+    std::vector<std::byte> raw_;
+
 public:
-    const std::vector<std::byte>& raw_;
     std::unordered_multimap<std::uint32_t, Container> parsed_;
 
 public:
     ParsedMocopiPacket(const std::vector<std::byte>& raw);
+
+    ParsedMocopiPacket()                                     = default;
     ParsedMocopiPacket(const ParsedMocopiPacket&)            = default;
     ParsedMocopiPacket(ParsedMocopiPacket&&)                 = default;
     ~ParsedMocopiPacket()                                    = default;
@@ -122,6 +126,6 @@ public:
     bool hasBoneDefinition() const;
     bool hasFrameData() const;
 };
-} // namespace shigenoy::mocopi_receiver
+} // namespace shigenoy::mocopi_parser
 
 #endif

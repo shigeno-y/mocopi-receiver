@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-#include <shigenoy/mocopi-receiver/Container.hpp>
-#include <shigenoy/mocopi-receiver/Generator.hpp>
-
 #include <filesystem>
 #include <iostream>
-#include <vector>
 
 #include <CLI/CLI.hpp>
 
@@ -28,7 +24,7 @@ main(int argc, char* argv[])
         {
             return app.exit(e);
         }
-
+        /*
         if (std::filesystem::exists(packet_file_path))
         {
             std::ifstream ifs{ packet_file_path, std::ios::in | std::ios::binary };
@@ -41,12 +37,13 @@ main(int argc, char* argv[])
             ifs.read(reinterpret_cast<char*>(buf.data()), buf.size());
             if (ifs)
             {
-                const shigenoy::mocopi_receiver::ParsedMocopiPacket p{ buf };
+                const shigenoy::mocopi_parser::ParsedMocopiPacket p{ buf };
+                std::vector<pxr::TfToken> joints;
 
-                if (p.parsed_.contains(shigenoy::mocopi_receiver::wellknown_code::BNDT))
+                if (p.hasBoneDefinition())
                 {
                     // Bone Definition
-                    for (const auto& b : shigenoy::mocopi_receiver::readBoneDefinitions(p))
+                    for (const auto& b : shigenoy::mocopi_parser::readBoneDefinitions(p))
                     {
                         std::cout << "Bone#" << b.bnid_;
                         std::cout << "\tParent#" << b.pbid_;
@@ -59,11 +56,20 @@ main(int argc, char* argv[])
                         std::cout << b.tran_y_ << ", ";
                         std::cout << b.tran_z_ << "})\n";
                     }
+                    {
+                        auto stage     = pxr::UsdStage::CreateInMemory();
+                        auto skel_root = pxr::UsdSkelRoot::Define(stage, pxr::SdfPath{ "/Skel" });
+                        stage->SetDefaultPrim(skel_root.GetPrim());
+
+                        shigenoy::mocopi_parser::generateSkelRoot(stage, skel_root, joints, p);
+                        stage->Flatten()->Export(
+                            std::filesystem::path{ "T:/hogehoge.usda" }.generic_string());
+                    }
                 }
-                else if (p.parsed_.contains(shigenoy::mocopi_receiver::wellknown_code::BTDT))
+                else if (p.hasFrameData())
                 {
                     // Frame Data
-                    for (const auto& b : shigenoy::mocopi_receiver::readBoneTransforms(p))
+                    for (const auto& b : shigenoy::mocopi_parser::readBoneTransforms(p))
                     {
                         std::cout << "Bone#" << b.bnid_;
                         std::cout << "\t(quat{X, Y, Z, W}, tran{X, Y, Z})=({";
@@ -75,9 +81,19 @@ main(int argc, char* argv[])
                         std::cout << b.tran_y_ << ", ";
                         std::cout << b.tran_z_ << "})\n";
                     }
+                    {
+                        auto stage     = pxr::UsdStage::CreateInMemory();
+                        auto skel_root = pxr::UsdSkelRoot::Define(stage, pxr::SdfPath{ "/Skel" });
+                        stage->SetDefaultPrim(skel_root.GetPrim());
+
+                        shigenoy::mocopi_parser::generateSkelAnim(stage, skel_root, joints, p);
+                        stage->Flatten()->Export(
+                            std::filesystem::path{ "T:/hogehoge.usda" }.generic_string());
+                    }
                 }
             }
         }
+        // */
     }
     catch (const std::exception& e)
     {
