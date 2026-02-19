@@ -46,8 +46,10 @@ UsdMocopiReceiverFileFormat::Read(SdfLayer* layer,
     if (handle)
     {
         auto root_prim_spec =
-            pxr::SdfPrimSpec::New(handle, "Skel", pxr::SdfSpecifier::SdfSpecifierDef);
-        root_prim_spec->SetTypeName("SkelRoot");
+            pxr::SdfPrimSpec::New(handle,
+                                  shigenoy::mocopi_parser::tokens->listen_host.GetString(),
+                                  pxr::SdfSpecifier::SdfSpecifierDef);
+        root_prim_spec->SetTypeName("Scope");
         handle->SetDefaultPrim(root_prim_spec->GetNameToken());
 
         std::thread worker{ shigenoy::mocopi_parser::invokeWorkerThread, handle, args };

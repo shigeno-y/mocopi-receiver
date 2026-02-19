@@ -12,6 +12,9 @@ public:
     // metadata for this plugin
     pxr::TfToken listen_host{ "listenHost", pxr::TfToken::Immortal };
     pxr::TfToken listen_port{ "listenPort", pxr::TfToken::Immortal };
+
+    // Root prim
+    pxr::TfToken skels{ "Skels", pxr::TfToken::Immortal };
 };
 extern const pxr::TfStaticData<PrivateTokens> tokens;
 } // namespace shigenoy::mocopi_parser
