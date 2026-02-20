@@ -86,6 +86,16 @@ UsdMocopiReceiverFileFormat::ComposeFieldsForFileFormatArguments(
                 pxr::TfStringify(val.Get<unsigned int>());
         }
     }
+    // for honorFrameNumber
+    {
+        pxr::VtValue val;
+        if (context.ComposeValue(shigenoy::mocopi_parser::tokens->honor_frame_number, &val) &&
+            val.IsHolding<int>())
+        {
+            args->operator[](shigenoy::mocopi_parser::tokens->honor_frame_number) =
+                pxr::TfStringify(val.Get<int>());
+        }
+    }
 }
 
 bool

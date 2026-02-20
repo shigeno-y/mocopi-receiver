@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #include "Skeleton.hpp"
 
+#include "tokens.hpp"
+
 #include <shigenoy/mocopi_parser/Generator.hpp>
 
 #include <array>
@@ -263,13 +265,12 @@ shigenoy::mocopi_parser::generateSkelRoot(pxr::UsdStageRefPtr stage,
     generateSkelData(root, bind_transforms, joint_names, joints, rest_transforms);
 
     {
-        auto skeleton = pxr::UsdSkelSkeleton::Define(
-            stage, skel_root.GetPath().AppendChild(pxr::TfToken{ "Skeleton" }));
+        auto skeleton =
+            pxr::UsdSkelSkeleton::Define(stage, skel_root.GetPath().AppendChild(tokens->skeleton));
         skeleton.GetPurposeAttr().Set(pxr::UsdGeomTokens->guide);
         skel_root.GetPrim()
-            .GetRelationship(pxr::TfToken{ "skel:animationSource" })
-            .SetTargets({ skel_root.GetPath().AppendChild(pxr::TfToken{ "Motion" }) });
-
+            .GetRelationship(tokens->skel_animationSource)
+            .SetTargets({ skel_root.GetPath().AppendChild(tokens->motion) });
         {
             const auto& arr = bind_transforms;
             skeleton.GetBindTransformsAttr().Set(

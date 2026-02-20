@@ -5,7 +5,10 @@
 #    include <shigenoy/mocopi_parser/Container.hpp>
 
 #    include "pxr/usd/usd/stage.h"
+#    include "pxr/usd/usdSkel/animation.h"
+#    include "pxr/usd/usdSkel/bindingAPI.h"
 #    include "pxr/usd/usdSkel/root.h"
+#    include "pxr/usd/usdSkel/skeleton.h"
 
 namespace shigenoy::mocopi_parser {
 void generateSkelRoot(pxr::UsdStageRefPtr stage,
@@ -15,7 +18,8 @@ void generateSkelRoot(pxr::UsdStageRefPtr stage,
 
 void generateSkelAnim(pxr::UsdStageRefPtr stage,
                       pxr::UsdSkelRoot& skel_root,
+                      bool honorFrameNumber,
                       const std::vector<pxr::TfToken>& joints,
-                      const ParsedMocopiPacket& boneTransformPacket);
+                      const ParsedMocopiPacket& bone_transform_packet);
 } // namespace shigenoy::mocopi_parser
 #endif

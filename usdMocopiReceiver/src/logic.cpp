@@ -37,6 +37,7 @@ shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
     constexpr std::chrono::milliseconds WAIT{ 10 };
     std::string host{ "127.0.0.1" };
     std::uint16_t port{ 12351 };
+    bool honorFrameNumber{ false };
 
     oneapi::tbb::concurrent_unordered_map<std::string,
                                           oneapi::tbb::concurrent_queue<ParsedMocopiPacket>>
@@ -55,15 +56,23 @@ shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
             port = static_cast<std::uint16_t>(std::stoul(listen_port->second));
         }
     }
+    {
+        const auto& honor_frame_number =
+            args.find(shigenoy::mocopi_parser::tokens->honor_frame_number);
+        if (honor_frame_number != args.cend())
+        {
+            honorFrameNumber = static_cast<int>(std::stoul(honor_frame_number->second)) != 0;
+        }
+    }
     shigenoy::mocopi_parser::receiveMocopiUdp(host, port, queue);
 
     std::unordered_map<std::string, std::vector<pxr::TfToken>> client_joints{};
     ParsedMocopiPacket packet{};
 
     auto stage = pxr::UsdStage::CreateInMemory();
-    auto rootPrim =
+    auto root_prim =
         pxr::UsdGeomScope::Define(stage, pxr::SdfPath{ "/" }.AppendChild(tokens->skels));
-    stage->SetDefaultPrim(rootPrim.GetPrim());
+    stage->SetDefaultPrim(root_prim.GetPrim());
     for (;;)
     {
         for (auto& mocopi : queue)
@@ -73,17 +82,21 @@ shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
             replaceAll<std::string>(client, ":", "p");
 
             auto skel_root = pxr::UsdSkelRoot::Define(
-                stage, rootPrim.GetPath().AppendChild(pxr::TfToken{ "mocopi" + client }));
+                stage, root_prim.GetPath().AppendChild(pxr::TfToken{ "mocopi" + client }));
 
             while (mocopi.second.try_pop(packet))
             {
                 if (!client_joints.contains(client) && packet.hasBoneDefinition())
                 {
+                    // just pre-define for anim source
+                    pxr::UsdSkelAnimation::Define(stage,
+                                                  skel_root.GetPath().AppendChild(tokens->motion));
                     generateSkelRoot(stage, skel_root, client_joints[client], packet);
                 }
                 else if (client_joints.contains(client) && packet.hasFrameData())
                 {
-                    generateSkelAnim(stage, skel_root, client_joints.at(client), packet);
+                    generateSkelAnim(
+                        stage, skel_root, honorFrameNumber, client_joints.at(client), packet);
                 }
             }
         }

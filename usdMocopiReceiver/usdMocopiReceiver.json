@@ -16,6 +16,13 @@
                         "displayGroup": "Core",
                         "appliesTo": ["prims", "layers"],
                         "documentation:": "Listen Port for Mocopi UDP"
+                    },
+                    "honorFrameNumber": {
+                        "type": "int",
+                        "default": 0,
+                        "displayGroup": "Core",
+                        "appliesTo": ["prims", "layers"],
+                        "documentation:": "when other than 0, Honor frame number in the packet as TimeCode"
                     }
                 },
                 "Types": {
