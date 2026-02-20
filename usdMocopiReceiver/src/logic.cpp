@@ -37,31 +37,30 @@ shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
     constexpr std::chrono::milliseconds WAIT{ 10 };
     std::string host{ "127.0.0.1" };
     std::uint16_t port{ 12351 };
-    bool honorFrameNumber{ false };
+    bool honor_frame_number{ false };
 
     oneapi::tbb::concurrent_unordered_map<std::string,
                                           oneapi::tbb::concurrent_queue<ParsedMocopiPacket>>
         queue;
     {
-        const auto& listen_host = args.find(shigenoy::mocopi_parser::tokens->listen_host);
-        if (listen_host != args.cend())
+        const auto& itr = args.find(shigenoy::mocopi_parser::tokens->listen_host);
+        if (itr != args.cend())
         {
-            host = listen_host->second;
+            host = itr->second;
         }
     }
     {
-        const auto& listen_port = args.find(shigenoy::mocopi_parser::tokens->listen_port);
-        if (listen_port != args.cend())
+        const auto& itr = args.find(shigenoy::mocopi_parser::tokens->listen_port);
+        if (itr != args.cend())
         {
-            port = static_cast<std::uint16_t>(std::stoul(listen_port->second));
+            port = static_cast<std::uint16_t>(std::stoul(itr->second));
         }
     }
     {
-        const auto& honor_frame_number =
-            args.find(shigenoy::mocopi_parser::tokens->honor_frame_number);
-        if (honor_frame_number != args.cend())
+        const auto& itr = args.find(shigenoy::mocopi_parser::tokens->honor_frame_number);
+        if (itr != args.cend())
         {
-            honorFrameNumber = static_cast<int>(std::stoul(honor_frame_number->second)) != 0;
+            honor_frame_number = static_cast<int>(std::stoul(itr->second)) != 0;
         }
     }
     shigenoy::mocopi_parser::receiveMocopiUdp(host, port, queue);
@@ -96,7 +95,7 @@ shigenoy::mocopi_parser::invokeWorkerThread(pxr::SdfLayerHandle handle,
                 else if (client_joints.contains(client) && packet.hasFrameData())
                 {
                     generateSkelAnim(
-                        stage, skel_root, honorFrameNumber, client_joints.at(client), packet);
+                        stage, skel_root, honor_frame_number, client_joints.at(client), packet);
                 }
             }
         }

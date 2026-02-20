@@ -268,9 +268,10 @@ shigenoy::mocopi_parser::generateSkelRoot(pxr::UsdStageRefPtr stage,
         auto skeleton =
             pxr::UsdSkelSkeleton::Define(stage, skel_root.GetPath().AppendChild(tokens->skeleton));
         skeleton.GetPurposeAttr().Set(pxr::UsdGeomTokens->guide);
-        skel_root.GetPrim()
-            .GetRelationship(tokens->skel_animationSource)
-            .SetTargets({ skel_root.GetPath().AppendChild(tokens->motion) });
+
+        // animation_binding.GetAnimationSourceRel().AddTarget(skel_anim.GetPath());
+        pxr::UsdSkelBindingAPI{ skel_root.GetPrim() }.GetAnimationSourceRel().AddTarget(
+            skel_root.GetPath().AppendChild(tokens->motion));
         {
             const auto& arr = bind_transforms;
             skeleton.GetBindTransformsAttr().Set(

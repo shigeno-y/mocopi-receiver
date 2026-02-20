@@ -12,7 +12,7 @@
 void
 shigenoy::mocopi_parser::generateSkelAnim(pxr::UsdStageRefPtr stage,
                                           pxr::UsdSkelRoot& skel_root,
-                                          bool honorFrameNumber,
+                                          bool honor_frame_number,
                                           const std::vector<pxr::TfToken>& joints,
                                           const ParsedMocopiPacket& bone_transform_packet)
 {
@@ -39,7 +39,7 @@ shigenoy::mocopi_parser::generateSkelAnim(pxr::UsdStageRefPtr stage,
             initial_translations.emplace_back(bone.tran_x_, bone.tran_y_, bone.tran_z_);
         }
 
-        if (honorFrameNumber)
+        if (honor_frame_number)
         {
             const auto& fnum =
                 bone_transform_packet.parsed_.equal_range(wellknown_code::FNUM).first->second;
