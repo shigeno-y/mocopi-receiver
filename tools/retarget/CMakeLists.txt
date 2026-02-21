@@ -8,7 +8,9 @@ add_executable(${PROJECT_NAME})
 target_sources(
   ${PROJECT_NAME}
   PRIVATE #
+          include/logic.hpp #
           include/tokens.hpp #
+          src/logic.cpp #
           src/main.cpp #
           src/tokens.cpp #
 )
